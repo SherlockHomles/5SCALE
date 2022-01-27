@@ -23,13 +23,18 @@ class AOPDomain(object):
         Sg: viewed ground, this parameter derived from AOPTree.Sg_0 after resizing the tree(Eq.21)
         PgapV: gap fraction of a tree crown viewed from viewer
         PgapS: gap fraction of a tree crown viewed from sun
+        Pgap0: gap fraction of a tree crown viewed from nadir
         Gv: G(SZA)*Omega_E/gamma_E in Eq.22
         Gs: G(VZA)*Omega_E/gamma_E in Eq.22
         GFoliage: G(VZA) in Eq.22 when tree has no branches, it equals to A*VZA+C
         A, C: constants required to calculate GFoliage, Gv, Gs, PgapV, PgapS when tree has no branches
+        OmegaT: clumping index of a tree, Eq.43
+        E_r: mean gap between tree crowns when trees are subject to poisson distribution, Eq.41/42
+        Wt: characteristic width of a tree crown projected on the ground,Eq.41
+        Lt: clumping adjusted projected tree crown area index, Eq.42
 
     Methods:
-        _resize_tree: recalculate Vg and Sg after taking tree size into account
+        _resize_tree: adjust Vg and Sg with tree size
         _Pgap: calculate gap fraction according to option
         _G: calculate either Gv or Gs, depending on option
         _p_gap_ax_b: calculate gap fraction when tree has no branches
@@ -677,17 +682,6 @@ class AOPDomain(object):
             raise ValueError('Bad option, it must be GROUND, NADIR or CANOPY (case insensitive)')
 
         if XI < pi / 2.:
-            # i = 0
-            # while i < max_integral:
-            #    if lambda_m + increment * i != 0:
-            #        in1 = in1 + exp(-lt * (1 + (lambda_m + increment * i) / w)) / atan((lambda_m + increment * i) / H)
-            #    in2 = in2 + exp(-lt * (1 + (lambda_m + increment * i) / w))
-
-            #    if flag_in1 == in1 and flag_in2 == in2:
-            #        break
-            #    flag_in1 = in1
-            #    flag_in2 = in2
-            #    i = i + 1
             i = np.linspace(0, max_integral, max_integral + 1)
             i_tmp = lambda_m + increment * i
             i_tmp1 = i_tmp[np.where(i_tmp != 0)]
