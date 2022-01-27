@@ -35,8 +35,11 @@ class AOPDomain(object):
         lambda_m: Eq.52
         PSG0_VIEW: mean gap fraction in one crown viewed from viewer
         PSG0_SUN: mean gap fraction in one crown viewed from sun
-        PVG:overlap_v1ping prob of Vg,i.e. Eq.26, this param does not consider vertical overlap
-        Pvg:overlap_v1ping prob of Vg,i.e. Eq.26, this param considers vertical overlap
+        PVG:overlapping prob of Vg,i.e. Eq.26, this param does not consider vertical overlap
+        Pvg:overlapping prob of Vg,i.e. Eq.26, this param considers vertical overlap
+        Pvc: overlapping prob of Vgc,i.e. Eq.27
+        PV: overlapping prob of Vgb,i.e. Eq.29, this param does not consider vertical overlapping
+        Pv: overlapping prob of Vgb,i.e. Eq.29, this param does not consider vertical overlapping
 
     Methods:
         _resize_tree: adjust Vg and Sg with tree size
@@ -245,21 +248,21 @@ class AOPDomain(object):
     @property
     def PVG(self):  # Eq.26
         '''
-        @return: overlap_v1ping prob of Vg,i.e. Eq.26, this param does not consider vertical overlap
+        @return: overlapping prob of Vg,i.e. Eq.26, this param does not consider vertical overlap
         '''
         return self._overlap_v1('VZA', 'Pvg')
 
     @property
     def Pvg(self):
         '''
-        @return: overlap_v1ping prob of Vg,i.e. Eq.26, this param considers vertical overlap
+        @return: overlapping prob of Vg,i.e. Eq.26, this param considers vertical overlap
         '''
         return self._fo('VZA', 'Pvg')
 
     @property
     def Pvc(self):
         '''
-        @return: overlap_v1ping prob of Vgc,i.e. Eq.27
+        @return: overlapping prob of Vgc,i.e. Eq.27
         '''
         shape = self.domain.tree.shape
         if 'CONE_CYLINDER' == shape:
@@ -270,42 +273,42 @@ class AOPDomain(object):
     @property
     def PV(self):  # Eq. 29
         '''
-        @return: overlap_v1ping prob of Vgb,i.e. Eq.29, this param does not consider vertical overlapping
+        @return: overlapping prob of Vgb,i.e. Eq.29, this param does not consider vertical overlapping
         '''
         return self._overlap_v1('VZA', 'Pv')
 
     @property
     def Pv(self):  # Eq. 29
         '''
-        @return: overlap_v1ping prob of Vgb,i.e. Eq.29, this param considers vertical overlapping
+        @return: overlapping prob of Vgb,i.e. Eq.29, this param considers vertical overlapping
         '''
         return self._fo('VZA', 'Pv')
 
     @property
     def PIG(self):
         '''
-        @return: overlap_v1ping prob of Sg, this param does not consider vertical overlapping
+        @return: overlapping prob of Sg, this param does not consider vertical overlapping
         '''
         return self._overlap_v1('SZA', 'Pig')
 
     @property
     def Pig(self):
         '''
-        @return: overlap_v1ping prob of Sg, this param considers vertical overlapping
+        @return: overlapping prob of Sg, this param considers vertical overlapping
         '''
         return self._fo('SZA', 'Pig')
 
     @property
     def Pig_poisson(self):
         '''
-        @return: overlap_v1ping prob of Sg
+        @return: overlapping prob of Sg
         '''
         return self._overlap_v1('SZA', 'Pig_poisson')
 
     @property
     def PS(self):
         '''
-        @return: overlap_v1ping prob of Sgb, this param does not consider vertical overlapping
+        @return: overlapping prob of Sgb, this param does not consider vertical overlapping
         '''
         if not hasattr(self, '_PS'):
             # self._PS = self._overlap_v1('SZA', 'Ps')
@@ -315,7 +318,7 @@ class AOPDomain(object):
     @property
     def Ps(self):
         '''
-        @return: overlap_v1ping prob of Sgb, this param considers vertical overlapping
+        @return: overlapping prob of Sgb, this param considers vertical overlapping
         '''
         return self._fo('SZA', 'Ps')
 
