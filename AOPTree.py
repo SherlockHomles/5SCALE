@@ -712,16 +712,3 @@ class AOPSpheroidTree(AOPTree, AOPSpecies):
         ZA_prime = atan(b / R * tan(ZA))
         g_s = pi * R * R / (cos(ZA_prime))
         return g_s
-
-
-if __name__ == '__main__':
-    leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
-    ct = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.98, gamma_E=1.41)
-    gvi = GeoVI(45, 15, 180)
-    aop_ct = AOPConeTree(ct, gvi)
-    print('ct.alpha before change: %f' % ct.alpha)
-    print('tac before change: %f' % aop_ct.tac)
-    ct.alpha = 45
-    print('ct.alpha after change: %f' % ct.alpha)
-    aop_ct.tree = ct
-    print('tac after change: %f' % aop_ct.tac)

@@ -6,7 +6,7 @@ from scipy.stats import poisson
 
 class Domain(object):
     '''
-    the abstract class contains necessary attributes of a domain or pixel comprised of quadrats that grows trees
+    the class contains necessary attributes of a domain or pixel comprised of quadrats that grows trees
     Attributes:
         tree: it must be classes inherited from Tree
         area: domain area
@@ -227,10 +227,3 @@ class Domain(object):
             raise ValueError(Error_info)
         px = [x / px_tot for x in px]
         return px
-
-
-if __name__ == '__main__':
-    leaf = Needle(40, 1.6, 0.045, 0.0005, 2., 200, 40, 1, 100)
-    tree = ConeTree(leaf, 2, 13, 5, 3.5)
-    domain = Domain(tree, 1500, 100, 10)
-    domain.area = 1000
