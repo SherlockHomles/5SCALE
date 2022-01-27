@@ -155,7 +155,7 @@ def cal_mi(ref):
 
 class LeafSpecies(ABC):
     '''
-    this class stores species-specific leaf biochemical and biophysical traits
+    this abstract class stores species-specific leaf biochemical and biophysical traits
     Attributes:
         DHR: leaf directional-hemispherical reflectance(DHR)
         DHT: leaf directional-hemispherical transmittance(DHT)
@@ -608,15 +608,3 @@ class Needle(Leaf, LeafSpecies):
         xu = self.xu
         wv, refl, trans = LIBERTY(diameter, xu, thickness, baseline, albino, Cab, Cw, Cl, Cp)
         return wv, refl, trans
-
-
-if __name__ == '__main__':
-    # a = {'diameter': 40, 'xu': 0.045, 'thickness': 1.6, 'baseline': 0.0005, 'albino': 2, 'c_factor': 200,
-    #     'w_factor': 100, 'l_factor': 40, 'p_factor': 1}
-    # leaf = Leaf(**a)
-    ## wv, refl, trans = leaf.PROSPECT(version = '5')
-    # wv, trans, refl = LIBERTY()
-
-    broadleaf = Broadleaf(2, 50, 10, 1, 1, 0.05)
-    # needle = Needle(40, 1.6, 0.045, 0.0005, 2, 200, 40, 1, 100)
-    # print(needle.DHR)
