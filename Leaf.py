@@ -1,5 +1,3 @@
-import sys
-sys.path.append('../prosail/')
 from typing import Optional
 from prospect_d import run_prospect
 import numpy as np
