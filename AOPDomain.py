@@ -655,7 +655,6 @@ class AOPDomain(object):
         return lo_90, cs, cv
 
     def _ptg_sub(self, option: str, max_integral: float, increment: float):
-        in1, in2, flag_in1, flag_in2 = 0., 0., 0., 0.
         i = 0
         f_thelta, lt, cold, hot, w, ptg, f, H, XI, lambda_m = 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.
         d = self.domain.n_tree
@@ -1292,13 +1291,9 @@ class AOPDomain(object):
 
                 if thelta_min > thelta_max:
                     thelta_min, thelta_max = thelta_max, thelta_min
-                    # thelta_tmp = thelta_min
-                    # thelta_min = thelta_max
-                    # thelta_max = thelta_tmp
 
                 thelta = thelta_min
                 while thelta <= thelta_max:
-                    # for thelta in range(thelta_min, thelta_max, inc_thelta):
                     thelta_h = pi - 2 * thelta
                     f_tt2 = f_tt2 + self._q1(thelta_h, 0) * cos(thelta) * sin(thelta) * inc_thelta * 10 * pi / 180
                     del1 = 0
@@ -1350,7 +1345,6 @@ class AOPDomain(object):
                 raise ValueError('F_G_T is smaller than 0')
             # calculate shaded reflectivities
             rt_2nd = rt * ((rt + tt * ft) * f_t_t + rg * F_g_T + fd * f_s_t)
-            #temp = rt[0] * (rt[0] * f_t_zt+ tt[0] * f_tt_zt + rg[0] * F_g_T + fd[0] * f_s_t)
             rtz_2nd = rt * (rt * f_t_zt + tt * f_tt_zt + rg * F_g_T + fd * f_s_t)
             rg_2nd = rg * (rt * f_t_g + tt * f_tt_g + fd * f_s_g)
             rgt_2nd = (rg_2nd * F_G_T + rtz_2nd * (1 - F_G_T - f_t_t - f_s_trest) + rt_2nd * (f_t_t + f_zt_t)) / (
