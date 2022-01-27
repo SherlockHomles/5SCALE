@@ -3,12 +3,11 @@ from typing import Optional
 
 import pandas as pd
 from Domain import Domain
-from AOPTree import GeoVI, AOPTree, AOPConeTree, AOPSpheroidTree
-from Tree import Tree, ConeTree, SpheroidTree
-from Leaf import Leaf, Broadleaf, Needle
-from math import exp, cos, sin, pi, tan, acos, log, sqrt, atan, radians, degrees, asin
+from AOPTree import GeoVI, AOPConeTree, AOPSpheroidTree
+from Tree import ConeTree, SpheroidTree
+from Leaf import Needle
+from math import exp, cos, sin, pi, tan, acos, log, sqrt, atan, degrees, asin
 from scipy.special import comb
-from scipy import integrate
 import numpy as np
 
 
@@ -16,7 +15,8 @@ class AOPDomain(object):
     '''
     the class calculates apparent optical properties of a domain
     Attributes:
-        geovi: an object contains information about view and illumination geometries
+        geovi: an object contains information about view and illumination geometries ( perhaps a better way is to define
+                a class for viewer and sun separately)
         domain: a class contains inherent properties of a domain
         AOP_tree: returns an AOP class inherited from AOPTree subclass, this parameter contains AOP of a tree
         Vg: viewed ground, this parameter derived from AOPTree.Vg_0 after resizing the tree(Eq.21)
@@ -32,6 +32,7 @@ class AOPDomain(object):
         E_r: mean gap between tree crowns when trees are subject to poisson distribution, Eq.41/42
         Wt: characteristic width of a tree crown projected on the ground,Eq.41
         Lt: clumping adjusted projected tree crown area index, Eq.42
+        lambda_m: Eq.52
 
     Methods:
         _resize_tree: adjust Vg and Sg with tree size
