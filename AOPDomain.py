@@ -1221,7 +1221,7 @@ class AOPDomain(object):
         if intensity < 0: intensity = -intensity
         intensity = cos(intensity)
 
-        # should intersect wave with the wavelengths of background_foliage
+        # intersect wave with the wavelengths of background_foliage
         wv_back = background_ref[:, 0]
         wv_back = wv_back.flatten()
         background_ref = background_ref[:, 1]
