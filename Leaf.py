@@ -7,7 +7,7 @@ import pandas as pd
 from abc import abstractmethod, ABC
 
 
-def tav(teta, ref):
+def tav(teta: float, ref: float):
     s = np.size(ref, 0)
     teta = np.radians(teta)
     r2 = np.square(ref)
@@ -40,7 +40,8 @@ def tav(teta, ref):
     return f
 
 
-def LIBERTY(D, xu, thickness, baseline, albino, c_factor, w_factor, l_factor, p_factor):
+def LIBERTY(D: float, xu: float, thickness: float, baseline: float, albino: float, c_factor: float, w_factor: float,
+            l_factor: float, p_factor: float):
     '''
     Main body of the LIBERTY model
     Reference: Dawson, T. P., Curran, P. J., & Plummer, S. E. (1998).
