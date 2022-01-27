@@ -1,4 +1,3 @@
-'''this is a leaf object, it has several biophyiscal and chemical traits'''
 from typing import Optional
 
 from prosail.prospect_d import run_prospect
