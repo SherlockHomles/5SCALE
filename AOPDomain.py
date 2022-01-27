@@ -13,7 +13,7 @@ import numpy as np
 
 class AOPDomain(object):
     '''
-    the class calculates apparent optical properties of a domain
+    the class calculates apparent optical properties(AOP, i.e. view and sun geometries dependent) of a domain
     Attributes:
         geovi: an object contains information about view and illumination geometries ( perhaps a better way is to define
                 a class for viewer and sun separately)
@@ -35,6 +35,8 @@ class AOPDomain(object):
         lambda_m: Eq.52
         PSG0_VIEW: mean gap fraction in one crown viewed from viewer
         PSG0_SUN: mean gap fraction in one crown viewed from sun
+        PVG:overlap_v1ping prob of Vg,i.e. Eq.26, this param does not consider vertical overlap
+        Pvg:overlap_v1ping prob of Vg,i.e. Eq.26, this param considers vertical overlap
 
     Methods:
         _resize_tree: adjust Vg and Sg with tree size
