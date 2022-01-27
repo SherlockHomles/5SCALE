@@ -378,7 +378,7 @@ class Broadleaf(Leaf, LeafSpecies):
     Notes:
         DHR and DHT are regarded as inherent optical properties of leaves since they are independent of view or
     illumination geometries, they are calculated by leaf optical properties model
-        this class uses PROSPECT model to simulate leaf DHR and DHT, the model can be downloaded from
+        In this class, leaf DHR and DHT are simulated by PROSPECT which could be downloaded from
         http://teledetection.ipgp.jussieu.fr/prosail/
     '''
 
