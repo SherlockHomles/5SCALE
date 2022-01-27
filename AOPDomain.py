@@ -33,6 +33,8 @@ class AOPDomain(object):
         Wt: characteristic width of a tree crown projected on the ground,Eq.41
         Lt: clumping adjusted projected tree crown area index, Eq.42
         lambda_m: Eq.52
+        PSG0_VIEW: mean gap fraction in one crown viewed from viewer
+        PSG0_SUN: mean gap fraction in one crown viewed from sun
 
     Methods:
         _resize_tree: adjust Vg and Sg with tree size
