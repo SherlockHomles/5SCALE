@@ -1,5 +1,5 @@
 from typing import Optional
-from prospect_d import run_prospect
+from prosail.prospect_d import run_prospect
 import numpy as np
 from math import pi, sin, cos, asin, tan
 import pandas as pd
