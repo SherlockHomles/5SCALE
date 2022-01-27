@@ -39,7 +39,9 @@ class AOPDomain(object):
         Pvg:overlapping prob of Vg,i.e. Eq.26, this param considers vertical overlap
         Pvc: overlapping prob of Vgc,i.e. Eq.27
         PV: overlapping prob of Vgb,i.e. Eq.29, this param does not consider vertical overlapping
-        Pv: overlapping prob of Vgb,i.e. Eq.29, this param does not consider vertical overlapping
+        Pv: overlapping prob of Vgb,i.e. Eq.29, this param considers vertical overlapping
+        PIG: overlapping prob of Sg, this param does not consider vertical overlapping
+        Pig: overlapping prob of Sg, this param considers vertical overlapping
 
     Methods:
         _resize_tree: adjust Vg and Sg with tree size
