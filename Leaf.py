@@ -68,11 +68,11 @@ def LIBERTY(D, xu, thickness, baseline, albino, c_factor, w_factor, l_factor, p_
     T12 = tav(90, n)
     me = 1 - T12
     mi = cal_mi(n)
-    k_a_f = '..\..\Liberty\input/ALBINO.DAT'
-    k_l_f = '..\..\Liberty\input/LIGCELL.DAT'
-    k_c_f = '..\..\Liberty\input/PIGMENT.DAT'
-    k_p_f = '..\..\Liberty\input/PROTEIN.DAT'
-    k_w_f = '..\..\Liberty\input/WATER.DAT'
+    k_a_f = 'ALBINO.DAT'
+    k_l_f = 'LIGCELL.DAT'
+    k_c_f = 'PIGMENT.DAT'
+    k_p_f = 'PROTEIN.DAT'
+    k_w_f = 'WATER.DAT'
     k_a = np.array(pd.read_csv(k_a_f, header=None).values.tolist())
     k_l = np.array(pd.read_csv(k_l_f, header=None).values.tolist())
     k_c = np.array(pd.read_csv(k_c_f, header=None).values.tolist())
