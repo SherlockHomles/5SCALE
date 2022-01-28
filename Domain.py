@@ -1,6 +1,5 @@
-from Leaf import Leaf, Needle, Broadleaf
 from Tree import Tree, ConeTree, SpheroidTree
-from math import pi, cos, sin, tan, asin, acos, atan, exp
+from math import pi, exp
 from scipy.stats import poisson
 
 
