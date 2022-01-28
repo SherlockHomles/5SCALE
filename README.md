@@ -12,3 +12,4 @@ The leaf class includes two subclasses: Broadleaf and Needle, corresponding to t
 different kinds of leaf optical properties models to simulate leaf directional-hemispherical reflectance and
 transmittance (DHR&DHT), PROSPECT for Broadleaf while LIBERTY for Needle by default. **The code includes LIBERTY only,
 PROSPECT model can be downloaded from** http://teledetection.ipgp.jussieu.fr/prosail/
+The background reflectance were fixed, an alternative is to incorporate soil reflectance model into this model
