@@ -1,8 +1,8 @@
 # 5SCALE
 
 5SCALE is a geometrical optics model proposed by Chen, J.M., &amp; Leblanc, S.G. (1997). It is often used to simulate
-canopy reflectance factor based on inputs of leaf and canopy biochemical and biophysical traits. It is the python
-version which was written following object-oriented coding(OOC) rule
+canopy reflectance factor based on inputs of leaf and canopy biochemical and biophysical traits. This is the python
+version written under object-oriented coding(OOC) rule
 
 Usage:
 run AOPDomain.py
