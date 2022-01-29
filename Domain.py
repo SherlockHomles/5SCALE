@@ -134,7 +134,6 @@ class Domain(object):
     # m2 ==0
     def _check_inputs(self, value, type_of_value):
         if type_of_value == 'tree':
-            print(type(SpheroidTree))
             if not isinstance(value, SpheroidTree) and not isinstance(value, ConeTree):
                 raise TypeError('tree type must be either ConeTree or SpheroidTree')
             if hasattr(self, '_area') and hasattr(self, '_n_tree') and hasattr(self, '_Fr') and hasattr(self, '_m2'):
