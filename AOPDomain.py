@@ -1,3 +1,4 @@
+import os
 import time
 from typing import Optional
 
@@ -563,7 +564,8 @@ class AOPDomain(object):
             if xi > 0.0001:
                 raise ValueError(
                     'BRDF may not be calculated correctly\n PT at VZA = %5.1f deg.' % degrees(self.geovi.VZA))
-        BACK_FILE = "soil_reflectance.txt"
+        tmp_path = os.path.dirname(os.path.abspath(__file__))
+        BACK_FILE = os.path.join(tmp_path, 'soil_reflectance.txt')
         BACKGROUND_REF = np.array(pd.read_csv(BACK_FILE, delim_whitespace=True).values.tolist())
         value = self._multiple_scattering(BACKGROUND_REF)
         return value
