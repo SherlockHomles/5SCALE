@@ -1419,6 +1419,6 @@ if __name__ == '__main__':
     domain = Domain(tree=tree, area=10000, n_tree=6000, n_quadrat=40, Fr=0.0, m2=0)
     geovi = GeoVI(SZA=20, VZA=0, phi=0)
     aop_domain = AOPDomain(geovi=geovi, domain=domain)
-    ro = aop_domain.ro()
+    wave, ro = aop_domain.ro()
     print(ro.size)
     print(ro)
