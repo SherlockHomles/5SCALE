@@ -567,8 +567,8 @@ class AOPDomain(object):
         tmp_path = os.path.dirname(os.path.abspath(__file__))
         BACK_FILE = os.path.join(tmp_path, 'soil_reflectance.txt')
         BACKGROUND_REF = np.array(pd.read_csv(BACK_FILE, delim_whitespace=True).values.tolist())
-        value = self._multiple_scattering(BACKGROUND_REF)
-        return value
+        wave, value = self._multiple_scattering(BACKGROUND_REF)
+        return wave, value
 
     def _q(self, return_type: str):
         xi = self.geovi.xi
@@ -1410,8 +1410,8 @@ if __name__ == '__main__':
     # ro = aop_domain.ro()
     # print(ro)
 
-    leaf = Broadleaf(N=1.2,Cab = 50, Car = 8, Cbrown=0, Cw = 0.01,Cm = 0.004)
-    #leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
+    leaf = Broadleaf(N=1.2, Cab=50, Car=8, Cbrown=0, Cw=0.01, Cm=0.004)
+    # leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
     tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
                         alpha_b=25)
     # tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
