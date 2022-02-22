@@ -1410,7 +1410,7 @@ if __name__ == '__main__':
     # ro = aop_domain.ro()
     # print(ro)
 
-    leaf = Broadleaf(N=1.2, Cab=50, Car=8, Cbrown=0, Cw=0.01, Cm=0.004)
+    leaf = Broadleaf(N=1.2, Cab=50, Car=8, Cbrown=0, Cw=0.01, Cm=0.004, lambdas=[600, 800, 1300])
     # leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
     tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
                         alpha_b=25)
@@ -1422,3 +1422,4 @@ if __name__ == '__main__':
     wave, ro = aop_domain.ro()
     print(ro.size)
     print(ro)
+    print(wave)

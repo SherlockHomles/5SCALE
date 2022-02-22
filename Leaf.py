@@ -1,9 +1,9 @@
 import sys, os
-tmp_path = os.path.abspath(__file__)
-tmp_path = os.path.dirname(tmp_path)
-tmp_path = os.path.dirname(tmp_path)
-tmp_path = os.path.join(tmp_path, 'prosail')
-sys.path.append(tmp_path)
+
+# tmp_path = os.path.abspath(__file__)
+# tmp_path = os.path.dirname(tmp_path)
+# tmp_path = os.path.join(tmp_path, 'prosail')
+# sys.path.append(tmp_path)
 from typing import Optional
 from prosail.prospect_d import run_prospect
 import numpy as np
@@ -219,6 +219,7 @@ class Leaf(object):
         ws: typical foliage element width
         cp: coefficient determined by optical properties of foliage elements (Eq.57), cp == 1 if foliages have
             lambertian surfaces used in Eq.57
+        lambdas: selected wavelengths
     Methods:
         spectra_simulation: simulate DHR and DHT with leaf optical properties models
     Notes:
@@ -379,6 +380,7 @@ class Broadleaf(Leaf, LeafSpecies):
         RATIO: leaf thickness/width ratio
         DHR: leaf directional-hemispherical reflectance(DHR)
         DHT: leaf directional-hemispherical transmittance(DHT)
+        lambdas: selected wavelengths, if assigned, it will only caluclate DHR &DHT at these wavelengths
     Methods:
         spectra_simulation: simulate DHR and DHT with PROSPECT model
     Notes:
@@ -389,7 +391,8 @@ class Broadleaf(Leaf, LeafSpecies):
     '''
 
     def __init__(self, N: float, Cab: float, Car: float, Cbrown: float, Cw: float, Cm: float, RATIO: float = 0.2,
-                 ws: float = 0.4, cp: float = 1.0, ant: Optional[float] = None, prospect_version: str = '5'):
+                 ws: float = 0.4, cp: float = 1.0, ant: Optional[float] = None, prospect_version: str = '5',
+                 lambdas=None):
         '''
         this abstract class stores biochemical and biophysical traits of a leaf, no matter it is a broadleaf or a needle
         @param N:structural parameter, denoting number of plates
@@ -404,7 +407,16 @@ class Broadleaf(Leaf, LeafSpecies):
         '''
         self.N = N
         self.prospect_version = prospect_version
+        self.lambdas = lambdas
         Leaf.__init__(self, Cab, Cw, Cm, Car, Cbrown, ant=ant, RATIO=RATIO, ws=ws, cp=cp)
+
+    @property
+    def lambdas(self):
+        return self.__lambdas
+
+    @lambdas.setter
+    def lambdas(self, value):
+        self.__lambdas = value
 
     @property
     def N(self):
@@ -503,11 +515,14 @@ class Broadleaf(Leaf, LeafSpecies):
         Cw = self.Cw
         Cm = self.Cm
         ant = self.ant
+        lambdas = self.lambdas
         prospect_version = self.prospect_version
         if '5' == prospect_version.upper():
-            wv, refl, trans = run_prospect(N, Cab, Car, Cbrown, Cw, Cm, prospect_version=prospect_version)
+            wv, refl, trans = run_prospect(N, Cab, Car, Cbrown, Cw, Cm, prospect_version=prospect_version,
+                                           wvls=lambdas)
         else:
-            wv, refl, trans = run_prospect(N, Cab, Car, Cbrown, Cw, Cm, ant=ant, prospect_version=prospect_version)
+            wv, refl, trans = run_prospect(N, Cab, Car, Cbrown, Cw, Cm, ant=ant, prospect_version=prospect_version,
+                                           wvls=lambdas)
         return wv, refl, trans
 
 
@@ -526,6 +541,7 @@ class Needle(Leaf, LeafSpecies):
         baseline: a parameter used to calculate refractive index on leaf surfaces
         DHR: leaf directional-hemispherical reflectance(DHR)
         DHT: leaf directional-hemispherical transmittance(DHT)
+        lambdas: selected wavelengths, if assigned, it will only caluclate DHR &DHT at these wavelengths
     Methods:
         _spectra_simulation: simulate DHR and DHT with LIBERTY model
     Notes:
