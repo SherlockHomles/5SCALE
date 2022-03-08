@@ -124,15 +124,15 @@ def run_prosail(n, cab, car, cbrown, cw, cm, lai, lidfa, hspot,
                                              tts, tto, psi, rsoil0)
 
     if factor == "SDR":
-        return rsot
+        return [rsot, refl, trans]
     elif factor == "BHR":
-        return rddt
+        return [rddt, refl, trans]
     elif factor == "DHR":
-        return rsdt
+        return [rsdt, refl, trans]
     elif factor == "HDR":
-        return rdot
+        return [rdot, refl, trans]
     elif factor == "ALL":
-        return [rsot, rddt, rsdt, rdot]
+        return [rsot, rddt, rsdt, rdot, refl, trans]
 
 
 def run_sail(refl, trans, lai, lidfa, hspot, tts, tto, psi,
