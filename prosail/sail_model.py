@@ -6,11 +6,12 @@ from prosail import spectral_lib
 from prosail.prospect_d import run_prospect
 from prosail.FourSAIL import foursail
 
-def run_prosail(n, cab, car,  cbrown, cw, cm, lai, lidfa, hspot,
-                tts, tto, psi, ant=0.0, alpha=40., prospect_version="5", 
+
+def run_prosail(n, cab, car, cbrown, cw, cm, lai, lidfa, hspot,
+                tts, tto, psi, ant=0.0, alpha=40., prospect_version="5",
                 typelidf=2, lidfb=0., factor="SDR",
                 rsoil0=None, rsoil=None, psoil=None,
-                soil_spectrum1=None, soil_spectrum2=None):
+                soil_spectrum1=None, soil_spectrum2=None, wvls=None):
     """Run the PROSPECT_5B and SAILh radiative transfer models. The soil
     model is a linear mixture model, where two spectra are combined together as
     print('c:', c)
@@ -97,22 +98,30 @@ def run_prosail(n, cab, car,  cbrown, cw, cm, lai, lidfa, hspot,
     else:
         soil_spectrum2 = spectral_lib.soil.rsoil2
 
+    if wvls is not None:
+        flag = np.in1d(np.arange(400, 2501, 1), wvls)
+        soil_spectrum1 = soil_spectrum1[flag]
+        soil_spectrum2 = soil_spectrum2[flag]
+
     if rsoil0 is None:
         if (rsoil is None) or (psoil is None):
-            raise ValueError( "If rsoil0 isn't define, then rsoil and psoil" + \
-                              " need to be defined!")
+            raise ValueError("If rsoil0 isn't define, then rsoil and psoil" + \
+                             " need to be defined!")
         rsoil0 = rsoil * (
-        psoil * soil_spectrum1 + (1. - psoil) * soil_spectrum2)
+                psoil * soil_spectrum1 + (1. - psoil) * soil_spectrum2)
+    else:
+        if len(rsoil0) != len(wvls):
+            raise ValueError('rsoil0 should match wvls')
 
-    wv, refl, trans = run_prospect(n, cab, car,  cbrown, cw, cm, ant=ant,
-                 prospect_version=prospect_version, alpha=alpha)
-    
+    wv, refl, trans = run_prospect(n, cab, car, cbrown, cw, cm, ant=ant,
+                                   prospect_version=prospect_version, alpha=alpha, wvls=wvls)
+
     [tss, too, tsstoo, rdd, tdd, rsd, tsd, rdo, tdo,
-         rso, rsos, rsod, rddt, rsdt, rdot, rsodt, rsost, rsot,
-         gammasdf, gammasdb, gammaso] = foursail(refl, trans,
-                                                  lidfa, lidfb, typelidf, 
-                                                  lai, hspot, 
-                                                  tts, tto, psi, rsoil0)
+     rso, rsos, rsod, rddt, rsdt, rdot, rsodt, rsost, rsot,
+     gammasdf, gammasdb, gammaso] = foursail(refl, trans,
+                                             lidfa, lidfb, typelidf,
+                                             lai, hspot,
+                                             tts, tto, psi, rsoil0)
 
     if factor == "SDR":
         return rsot
@@ -192,7 +201,7 @@ def run_sail(refl, trans, lai, lidfa, hspot, tts, tto, psi,
 
     factor = factor.upper()
     if factor not in ["SDR", "BHR", "DHR", "HDR", "ALL"]:
-        raise ValueError( "'factor' must be one of SDR, BHR, DHR, HDR or ALL")
+        raise ValueError("'factor' must be one of SDR, BHR, DHR, HDR or ALL")
 
     if soil_spectrum1 is not None:
         assert (len(soil_spectrum1) == 2101)
@@ -206,18 +215,17 @@ def run_sail(refl, trans, lai, lidfa, hspot, tts, tto, psi,
 
     if rsoil0 is None:
         if (rsoil is None) or (psoil is None):
-            raise ValueError( "If rsoil0 isn't define, then rsoil and psoil" + \
-                              " need to be defined!")
+            raise ValueError("If rsoil0 isn't define, then rsoil and psoil" + \
+                             " need to be defined!")
         rsoil0 = rsoil * (
-        psoil * soil_spectrum1 + (1. - psoil) * soil_spectrum2)
+                psoil * soil_spectrum1 + (1. - psoil) * soil_spectrum2)
 
-    
     [tss, too, tsstoo, rdd, tdd, rsd, tsd, rdo, tdo,
-         rso, rsos, rsod, rddt, rsdt, rdot, rsodt, rsost, rsot,
-         gammasdf, gammasdb, gammaso] = foursail(refl, trans,
-                                                  lidfa, lidfb, typelidf, 
-                                                  lai, hspot, 
-                                                  tts, tto, psi, rsoil0)
+     rso, rsos, rsod, rddt, rsdt, rdot, rsodt, rsost, rsot,
+     gammasdf, gammasdb, gammaso] = foursail(refl, trans,
+                                             lidfa, lidfb, typelidf,
+                                             lai, hspot,
+                                             tts, tto, psi, rsoil0)
 
     if factor == "SDR":
         return rsot
@@ -231,9 +239,9 @@ def run_sail(refl, trans, lai, lidfa, hspot, tts, tto, psi,
         return [rsot, rddt, rsdt, rdot]
 
 
-def run_thermal_sail(lam,  
-                     tveg, tsoil, tveg_sunlit, tsoil_sunlit, t_atm, 
-                     lai, lidfa, hspot, rsoil, 
+def run_thermal_sail(lam,
+                     tveg, tsoil, tveg_sunlit, tsoil_sunlit, t_atm,
+                     lai, lidfa, hspot, rsoil,
                      tts, tto, psi,
                      refl=None, emv=None, ems=None,
                      typelidf=2, lidfb=0):
@@ -241,45 +249,44 @@ def run_thermal_sail(lam,
     c2 = 14388.0
     # Calculate the thermal emission from the different
     # components using Planck's Law
-    top = (1.0e-6)*c1*(lam*1e-6)**(-5.)
-    Hc = top / (np.exp( c2/(lam*tveg))-1.)         # Shade leaves
-    Hh = top / (np.exp( c2/(lam*tveg_sunlit))-1.)  # Sunlit leaves
-    Hd = top / (np.exp( c2/(lam*tsoil))-1.)        # shade soil
-    Hs = top / (np.exp( c2/(lam*tsoil_sunlit))-1.) # Sunlit soil
-    Hsky = top / (np.exp( c2/(lam*t_atm))-1.)      # Sky emission
-    
+    top = (1.0e-6) * c1 * (lam * 1e-6) ** (-5.)
+    Hc = top / (np.exp(c2 / (lam * tveg)) - 1.)  # Shade leaves
+    Hh = top / (np.exp(c2 / (lam * tveg_sunlit)) - 1.)  # Sunlit leaves
+    Hd = top / (np.exp(c2 / (lam * tsoil)) - 1.)  # shade soil
+    Hs = top / (np.exp(c2 / (lam * tsoil_sunlit)) - 1.)  # Sunlit soil
+    Hsky = top / (np.exp(c2 / (lam * t_atm)) - 1.)  # Sky emission
+
     # Emissivity calculations
     if refl is not None and emv is None:
-        emv = 1. - refl # Assuming absorption is 1
+        emv = 1. - refl  # Assuming absorption is 1
     if rsoil is not None and ems is None:
         ems = 1. - rsoil
-    
+
     [tss, too, tsstoo, rdd, tdd, rsd, tsd, rdo, tdo,
-         rso, rsos, rsod, rddt, rsdt, rdot, rsodt, rsost, rsot,
-         gammasdf, gammasdb, gammaso] = foursail(refl, np.zeros_like(refl),
-                                                  lidfa, lidfb, typelidf, 
-                                                  lai, hspot, 
-                                                  tts, tto, psi, rsoil)
-    
+     rso, rsos, rsod, rddt, rsdt, rdot, rsodt, rsost, rsot,
+     gammasdf, gammasdb, gammaso] = foursail(refl, np.zeros_like(refl),
+                                             lidfa, lidfb, typelidf,
+                                             lai, hspot,
+                                             tts, tto, psi, rsoil)
+
     gammad = 1.0 - rdd - tdd
     gammao = 1.0 - rdo - tdo - too
 
-    tso = tss*too+tss*(tdo+rsoil*rdd*too)/(1.0-rsoil*rdd)
-    ttot = (too+tdo)/(1.0-rsoil*rdd)
-    gammaot = gammao + ttot*rsoil*gammad
-    gammasot = gammaso + ttot*rsoil*gammasdf
+    tso = tss * too + tss * (tdo + rsoil * rdd * too) / (1.0 - rsoil * rdd)
+    ttot = (too + tdo) / (1.0 - rsoil * rdd)
+    gammaot = gammao + ttot * rsoil * gammad
+    gammasot = gammaso + ttot * rsoil * gammasdf
 
     aeev = gammaot
-    aees = ttot*ems
+    aees = ttot * ems
 
-    Lw = ( rdot*Hsky + 
-            (aeev*Hc + 
-            gammasot*emv*(Hh-Hc) + 
-            aees*Hd + 
-            tso*ems*(Hs-Hd)))/np.pi
-    
-    dnoem1 = top/(Lw*np.pi)
-    Tbright = c2/(lam*np.log(dnoem1+1.0))
-    dir_em = 1.0 - rdot 
+    Lw = (rdot * Hsky +
+          (aeev * Hc +
+           gammasot * emv * (Hh - Hc) +
+           aees * Hd +
+           tso * ems * (Hs - Hd))) / np.pi
+
+    dnoem1 = top / (Lw * np.pi)
+    Tbright = c2 / (lam * np.log(dnoem1 + 1.0))
+    dir_em = 1.0 - rdot
     return Lw, Tbright, dir_em
-        
