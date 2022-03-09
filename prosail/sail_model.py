@@ -11,7 +11,7 @@ def run_prosail(n, cab, car, cbrown, cw, cm, lai, lidfa, hspot,
                 tts, tto, psi, ant=0.0, alpha=40., prospect_version="5",
                 typelidf=2, lidfb=0., factor="SDR",
                 rsoil0=None, rsoil=None, psoil=None,
-                soil_spectrum1=None, soil_spectrum2=None, wvls=None):
+                soil_spectrum1=None, soil_spectrum2=None, wvls=None, skyl=0):
     """Run the PROSPECT_5B and SAILh radiative transfer models. The soil
     model is a linear mixture model, where two spectra are combined together as
     print('c:', c)
@@ -98,10 +98,14 @@ def run_prosail(n, cab, car, cbrown, cw, cm, lai, lidfa, hspot,
     else:
         soil_spectrum2 = spectral_lib.soil.rsoil2
 
+    Ed = spectral_lib.light.ed
+    Es = spectral_lib.light.es
     if wvls is not None:
         flag = np.in1d(np.arange(400, 2501, 1), wvls)
         soil_spectrum1 = soil_spectrum1[flag]
         soil_spectrum2 = soil_spectrum2[flag]
+        Es = Es[flag]
+        Ed = Ed[flag]
 
     if rsoil0 is None:
         if (rsoil is None) or (psoil is None):
@@ -123,8 +127,12 @@ def run_prosail(n, cab, car, cbrown, cw, cm, lai, lidfa, hspot,
                                              lai, hspot,
                                              tts, tto, psi, rsoil0)
 
+    PARdifo = skyl * Ed
+    PARdiro = (1 - skyl) * Es
+    resv = (rdot * PARdifo + rsot * PARdiro) / (PARdiro + PARdifo)
+
     if factor == "SDR":
-        return [rsot, refl, trans]
+        return [resv, refl, trans]
     elif factor == "BHR":
         return [rddt, refl, trans]
     elif factor == "DHR":
