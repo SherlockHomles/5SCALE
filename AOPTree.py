@@ -276,7 +276,7 @@ class AOPConeTree(AOPTree, AOPSpecies):
 
     @property
     def Vgc(self):
-        #g_s, g_sc = self._gs('VZA')
+        # g_s, g_sc = self._gs('VZA')
         g_s, g_sc = self._gs('LAI')
         return g_sc
 
@@ -295,8 +295,8 @@ class AOPConeTree(AOPTree, AOPSpecies):
         g_s, g_sc = self._gs('LAI')
         return g_s
 
-    #@property
-    #def Vgc_mean(self):
+    # @property
+    # def Vgc_mean(self):
     #    g_s, g_sc = self._gs('LAI')
     #    return g_sc
 
@@ -415,7 +415,7 @@ class AOPConeTree(AOPTree, AOPSpecies):
             tic = (pi / 2 + gamma) * R * xa
 
         '''case 4 5'''
-        if 0 <= SZA < alpha < VZA and VZA > 0:
+        if 0 <= SZA < alpha and 0 < VZA < alpha:
             tic = pi * R * xa
 
         '''case 6'''
@@ -429,7 +429,7 @@ class AOPConeTree(AOPTree, AOPSpecies):
                 A1 = -xa / (2. * R) * _equation1(yf2, R)
                 A1 = A1 + yf2 * yf2 / (2. * yf2 / xf2)
             if xf > 0:
-                A2 = -xa / (2. * R) * _equation1(yf, R)
+                A2 = xa / (2. * R) * _equation1(yf, R)
                 A2 = A2 - yf * yf / (2. * yf / xf)
             if xf > 0 and yf2 > 0.:
                 A2 = -xa / (2. * R) * _equation1(yf2, R)
@@ -441,19 +441,19 @@ class AOPConeTree(AOPTree, AOPSpecies):
             if xf <= 0. and yf2 <= 0: A2 = pi * R * xa / 4
             if xf <= 0. and xf2 <= 0: A2 = 0
 
-            if xf <= 0 and yf > 0:
+            if xf <= 0 < yf:
                 A3 = -R / (2. * xa) * _equation1(xf, xa)
                 A3 = A3 + yf / xf * xf * xf / 2.
 
-            if xf <= 0. and yf > 0 and xf2 < 0:
+            if xf <= 0. and yf > 0 > xf2:
                 A3 = A3 - R / (2. * xa) * _equation1(xf2, xa)
-                A3 += yf / xf * xf * xf / 2.
+                A3 += yf2 / xf2 * xf2 * xf2 / 2.
             if xf <= 0 and yf < 0 and xf2 < 0:
                 A3 = pi * R * xa / 4
                 A3 = A3 + R / (2. * xa) * _equation1(xf2, xa)
-                A3 = A3 + yf / xf * xf * xf / 2.
+                A3 = A3 - yf2 / xf2 * xf2 * xf2 / 2.
 
-            if xf <= 0 and yf <= 0 and xf2 > 0:
+            if xf <= 0 < xf2 and yf <= 0:
                 A3 = pi * R * xa / 4
             if xf <= 0 and yf < 0:
                 A4 = -xa / (2 * R) * _equation1(yf, R)
@@ -505,60 +505,67 @@ class AOPConeTree(AOPTree, AOPSpecies):
             b2 = yf2 - m2 * xf2
             a = R * R + xa * xa * m2 * m2
             b = 2. * xa * xa * m2 * b2
+            c = xa * xa * (b2 * b2 - R * R)
             if b * b > 4. * a * c:
                 xe2 = (-b + sqrt(b * b - 4. * a * c)) / (2. * a)
             else:
                 xe2 = -b / (2. * a)
-            ye2 = m2 * xe + b2
+            ye2 = m2 * xe2 + b2
 
             if yf2 < 0:
-                A1 = xa / (2. * R) * (_equation1(ye2, R) - _equation1(yf2, R)) - (
-                        ye2 * ye2 - yf2 * yf2) / (
-                             2. * m2) - (
-                             -b2 * ye2 / m2 + b2 * yf2 / m2)
+                A1 = xa / (2. * R) * (_equation1(ye2, R) - _equation1(yf2, R)) - (ye2 * ye2 - yf2 * yf2) / (2. * m2) - (
+                        -b2 * ye2 / m2 + b2 * yf2 / m2)
             else:
                 A1 = 0
 
             if xf > 0 and yf > 0:
                 A2 = R / (2. * xa) * _equation1(xe, xa) - m1 * xe * xe / 2. - b1 * xe - R / (
-                        2. * xa) * _equation1(xf,
-                                              xa) + m1 * xf * xf / 2. + b1 * xf
+                        2. * xa) * _equation1(xf, xa) + m1 * xf * xf / 2. + b1 * xf
             if xf < 0 < yf:
-                A3 = -R / (2 * xa) * _equation1(xf, xa) + m1 * xf * xf / 2. + b1 * xf
+                A2 = R / (2 * xa) * _equation1(xe, xa) - m1 * xe * xe / 2. - b1 * xe
 
             if xf < 0 and yf <= 0:
-                A3 = pi * R * xa / 4.
+                A2 = pi * R * xa / 4.
+
+            if yf2 > 0 and xf2 > 0:
+                A2 = A2 - xa / (2. * R) * (_equation1(yf2, R) - _equation1(ye2, R)) + (yf2 * yf2 - ye2 * ye2) / (
+                        2 * m2) + (-b2 * yf2 / m2 + b2 * ye2 / m2)
 
             if yf2 > 0 >= xf2:
-                A3 = A3 - (-R / (2. * xa) * _equation1(xf2, xa) + m2 * xf2 * xf2 / 2. + b2 * xf2)
+                A2 = A2 - R / (2. * xa) * _equation1(xe2, xa) + (m2 * xe2 * xe2 / 2. + b2 * xe2)
+
+            if xf < 0 < yf:
+                A3 = -R / (2 * xa) * _equation1(xf, xa) + m1 * xf * xf / 2 + b1 * xf
+
+            if xf < 0 and yf <= 0:
+                A3 = pi * R * xa / 4
+
+            if xf2 <= 0 < yf2:
+                A3 = A3 - (-R / (2 * xa) * _equation1(xf2, xa) + m2 * xf2 * xf2 / 2 + b2 * xf2)
 
             if yf < 0 and xf < 0:
                 A4 = -xa / (2. * R) * _equation1(yf, R) - (yf * yf) / (2. * m1) + (b1 * yf / m1) + (
-                        b1 * b1) / (
-                             2. * m1) - (
-                             b1 * b1 / m1)
+                        b1 * b1) / (2. * m1) - (b1 * b1 / m1)
             if yf < 0 and xf < 0:
                 A1 = -xa / (2. * R) * _equation1(ye, R) + xe * (ye - b1) / 2.
             C = 0
             if xf < 0 < xf2:
                 m = (yd - ye) / (xd - xe)
                 b = yd - m * xd
-                C = _triangle(xe, ye, xd, yd, xg, 0.) - xa / (2. * R) * _equation1(yd, R) - _equation1(ye,
-                                                                                                       R) + (
-                            yd * yd / 2. - yd * b) / m - (ye * ye / 2. - ye * b) / m
+                C = _triangle(xe, ye, xd, yd, xg, 0.) - xa / (2. * R) * (_equation1(yd, R) - _equation1(ye, R)) + (
+                        yd * yd / 2. - yd * b) / m - (ye * ye / 2. - ye * b) / m
 
-            if xf < 0 and xf <= 0 and yf2 > 0:
-                if xe2 - xe < 0.0000001 and xe2 - xe > -0.0000001:
+            if xf < 0 < yf2 and xf <= 0:
+                if 0.0000001 > (xe2 - xe) > -0.0000001:
                     m = 0
                     b = ye
-                    C = _triangle(xe, ye, xe2, ye2, xg, 0.) - 2 * (
-                            xa / (2. * R) * _equation1(ye2, R) - xe * ye2)
+                    C = _triangle(xe, ye, xe2, ye2, xg, 0.) - 2 * (xa / (2. * R) * _equation1(ye2, R) - xe * ye2)
                 else:
                     m = (ye2 - ye) / (xe2 - xe)
                     b = ye - m * xe
                     C = _triangle(xe, ye, xe2, ye2, xg, 0.) - xa / (2. * R) * (
-                            _equation1(ye2, R) - _equation1(ye, R)) + (
-                                ye2 * ye2 / 2. - ye2 * b) / m - (ye * ye / 2. - ye * b) / m
+                            _equation1(ye2, R) - _equation1(ye, R)) + (ye2 * ye2 / 2. - ye2 * b) / m - (
+                                ye * ye / 2. - ye * b) / m
 
             tic = pi * R * xa
             tic = tic + 2 * xb * (R * yd - yd * yd / 2.) / R
