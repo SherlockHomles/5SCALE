@@ -399,7 +399,7 @@ class AOPDomain(object):
         if pti > 1:
             raise ValueError('There must something wrong with Pti, it is larger than 1')
         if pti < 0:
-            raise ValueError('There must something wrong with Pti, it is larger than 1')
+            raise ValueError('There must something wrong with Pti, it is smaller than 0')
         return pti
 
     @property
