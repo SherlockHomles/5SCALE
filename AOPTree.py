@@ -349,7 +349,7 @@ class AOPConeTree(AOPTree, AOPSpecies):
             yd = R * (1 - 2 * xa * xa / (xb * xb + xa * xa))
             tac = pi * R * xa
             tac = tac + 2 * xb / R * (R * yd - yd * yd / 2)
-            tac = tac - xa / (R * _equation1(yd, R))
+            tac = tac - xa / R * _equation1(yd, R)
             tab = 2 * sin(VZA) * R * Hb
         return tab, tac
 
