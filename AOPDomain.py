@@ -554,16 +554,13 @@ class AOPDomain(object):
         if ZG < 0:
             self._ZG = 0
             self._PG = self.Pvg
-            if xi > 0.0001:
-                raise ValueError(
-                    'BRDF may not be calculated correctly\n ZG at VZA = %5.1f deg.' % degrees(self.geovi.VZA))
         ZT = self.ZT
         if ZT < 0:
             self._ZT = 0
             self._PT = 1 - self.Pvg
-            if xi > 0.0001:
-                raise ValueError(
-                    'BRDF may not be calculated correctly\n PT at VZA = %5.1f deg.' % degrees(self.geovi.VZA))
+        #    if xi > 0.0001:
+        #        raise ValueError(
+        #            'BRDF may not be calculated correctly\n PT at VZA = %5.1f deg.' % degrees(self.geovi.VZA))
         tmp_path = os.path.dirname(os.path.abspath(__file__))
         BACK_FILE = os.path.join(tmp_path, 'soil_reflectance.txt')
         BACKGROUND_REF = np.array(pd.read_csv(BACK_FILE, delim_whitespace=True).values.tolist())
@@ -599,7 +596,7 @@ class AOPDomain(object):
             cs = cs - 0.0000001
             self._Cs = cs
         q2 = self.q2
-        a = gv * LAI * b / (d * vg_0 * cos(VZA) * cos(VZA)) / cos(SZA)
+        a = gv * LAI * b / (d * vg_0 * cos(VZA)) * cos(VZA) / cos(SZA)
         for i in range(1, __NN):
             pav_i = 0
             if exp(-(i - 1) * a) < 0.000000000000000000001:
