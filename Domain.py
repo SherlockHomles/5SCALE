@@ -1,6 +1,7 @@
 from Tree import Tree, ConeTree, SpheroidTree
 from math import pi, exp
 from scipy.stats import poisson
+from scipy.special import perm
 
 
 class Domain(object):
@@ -187,11 +188,8 @@ class Domain(object):
                 'trees')
 
     def _poisson(self):  # return an array of poisson parameters
-        px = []
         mu = self.n_tree / self.n_quadrat
-        for i in range(self.MAX_TREE_PER_QUADRAT):
-            p = poisson.pmf(i, mu)
-            px.append(p)
+        px = [poisson.pmf(i, mu) for i in range(self.MAX_TREE_PER_QUADRAT)]
         px_total = poisson.cdf(self.MAX_TREE_PER_QUADRAT, mu)
         if px_total < 0.95:
             Error_info = 'sum of all tree distribution probabilities is less than 0.95 (sum = {:8.5f})'.format(px_total)
