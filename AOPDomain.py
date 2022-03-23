@@ -10,6 +10,7 @@ from Leaf import Needle, Broadleaf
 from math import exp, cos, sin, pi, tan, acos, log, sqrt, atan, degrees, asin
 from scipy.special import comb
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class AOPDomain(object):
@@ -397,9 +398,10 @@ class AOPDomain(object):
         else:
             pti = (tib + tic) / (tab + tac)
         if pti > 1:
-            raise ValueError('There must something wrong with Pti, it is larger than 1')
+            pti = 1
+            # raise ValueError('There must be something wrong with Pti, it is larger than 1')
         if pti < 0:
-            raise ValueError('There must something wrong with Pti, it is smaller than 0')
+            raise ValueError('There must be something wrong with Pti, it is smaller than 0')
         return pti
 
     @property
@@ -551,7 +553,7 @@ class AOPDomain(object):
         ZG = self.ZG
         PT = self.PT
         xi = self.geovi.xi
-        if ZG < 0:
+        if self._ZG < 0:
             self._ZG = 0
             self._PG = self.Pvg
         ZT = self.ZT
@@ -671,6 +673,7 @@ class AOPDomain(object):
         elif 'GROUND' == option.upper():
             w = self.Wt
             lt = self.Lt
+            self.ZG
             cold = self.PS
             hot = self.Pig
             XI = self.geovi.xi
@@ -694,10 +697,10 @@ class AOPDomain(object):
             i_tmp = lambda_m + increment * i
             i_tmp1 = i_tmp[np.where(i_tmp != 0)]
             in1_e = np.exp(-lt * (1 + i_tmp1 / w)) / np.arctan(i_tmp1 / H)
-            in1_e = in1_e[np.where(in1_e >= 0.00000000001)]
+            #in1_e = in1_e[np.where(in1_e >= 0.00000000001)]
             in1 = np.sum(in1_e)
             in2_e = np.exp(-lt * (1 + i_tmp / w))
-            in2_e = in2_e[np.where(in2_e >= 0.00000000001)]
+            #in2_e = in2_e[np.where(in2_e >= 0.00000000001)]
             in2 = np.sum(in2_e)
 
             if in1 > 10000 or in1 < -10000:
@@ -732,7 +735,7 @@ class AOPDomain(object):
             if self.PS > self.Pvg - zg: self._PS = self.Pvg - zg
             if self.Pvg - zg < 0:
                 self._PS = 0
-                raise ValueError('Pvg is larger than ZG. Impossible!')
+                # raise ValueError('Pvg is larger than ZG. Impossible!')
             fn = f * fd
             return zg, fn
 
@@ -1011,7 +1014,8 @@ class AOPDomain(object):
                 Pig = PIG + (psvg0 - pvg_nadir) * fo
                 return Pig
             elif 'Ps' == return_type:
-                PS = self.PS
+                # PS = self.PS
+                PS = self._overlap_v1('SZA', 'Ps')
                 Ps = PS * (1 - fo)
                 return Ps
             else:
@@ -1398,25 +1402,46 @@ class AOPDomain(object):
 
 
 if __name__ == '__main__':
-    # leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
-    # tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
-    #                alpha_b=25, alpha_l=-1)
-    # domain = Domain(tree=tree, area=10000, n_tree=6000, n_quadrat=40, Fr=0.0, m2=0)
-    # geovi = GeoVI(SZA=20, VZA=0, phi=0)
-    # aop_domain = AOPDomain(geovi=geovi, domain=domain)
-    # ro = aop_domain.ro()
-    # print(ro)
-
-    leaf = Broadleaf(N=1.2, Cab=50, Car=8, Cbrown=0, Cw=0.01, Cm=0.004, lambdas=[600, 800, 1300])
-    # leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
-    tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
-                        alpha_b=25)
-    # tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
-    #                alpha_b=25, alpha_l=-1)
+    leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
+    # tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
+    #                    alpha_b=25)
+    tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
+                    alpha_b=25, alpha_l=-1)
     domain = Domain(tree=tree, area=10000, n_tree=6000, n_quadrat=40, Fr=0.0, m2=0)
-    geovi = GeoVI(SZA=20, VZA=0, phi=0)
-    aop_domain = AOPDomain(geovi=geovi, domain=domain)
-    wave, ro = aop_domain.ro()
-    print(ro.size)
-    print(ro)
-    print(wave)
+    # geovi = GeoVI(SZA=20, VZA=30, phi=0)
+    # aop_domain = AOPDomain(geovi=geovi, domain=domain)
+    # wave, ro = aop_domain.ro()
+    # print('\n', ro)
+    vza = range(-80, 80, 5)
+    bili_pg, bili_pt, bili_zg, bili_zt = [], [], [], []
+    for i in vza:
+        if i < 0:
+            geovi = GeoVI(SZA=20, VZA=abs(i), phi=180)
+        else:
+            geovi = GeoVI(SZA=20, VZA=i, phi=0)
+        aop_domain = AOPDomain(geovi=geovi, domain=domain)
+        #wave, ro = aop_domain.ro()
+        #zg, pg, pt, zt = aop_domain.ZG, aop_domain.PG, aop_domain.PT, aop_domain.ZT
+        #bili_pg.append(pg), bili_pt.append(pt), bili_zg.append(zg), bili_zt.append(zt)
+        try:
+            wave, ro = aop_domain.ro()
+        except Exception:
+           pass
+        finally:
+           zg, pg, pt, zt = aop_domain.ZG, aop_domain.PG, aop_domain.PT, aop_domain.ZT
+           bili_pg.append(pg), bili_pt.append(pt), bili_zg.append(zg), bili_zt.append(zt)
+    vza = list(vza)
+    rs = np.vstack((vza, bili_pg, bili_pt, bili_zg, bili_zt))
+    rs = np.transpose(rs)
+    np.save('abc_cone.npy', rs)
+    fig, ax = plt.subplots()
+    l1, = ax.plot(vza, bili_pg)
+    l2, = ax.plot(vza, bili_pt)
+    l3, = ax.plot(vza, bili_zg)
+    l4, = ax.plot(vza, bili_zt)
+    ax.set(xlabel='vza', ylabel='areal proportions')
+    ax.set_yticks([0, 0.5, 1])
+    ax.legend((l1, l2, l3, l4), ('sunlit ground', 'sunlit foliage', 'shaded ground', 'shaded foliage'),
+              loc='upper right', shadow=True)
+    ax.grid()
+    plt.show()
