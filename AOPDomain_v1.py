@@ -11,6 +11,7 @@ from math import exp, cos, sin, pi, tan, acos, log, sqrt, atan, degrees, asin
 from scipy.special import comb
 import numpy as np
 import matplotlib.pyplot as plt
+import multiprocessing as mp
 
 
 class AOPDomain(object):
@@ -1043,40 +1044,38 @@ class AOPDomain(object):
         return q1_thelta
 
 
-def simulate_Rc():
-    pass
-
-
-if __name__ == '__main__':
-    start = time.time()
+def simulate_Rc(vza: int):
     leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
     # tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
     #                    alpha_b=25)
     tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
                     alpha_b=25, alpha_l=-1)
     domain = Domain(tree=tree, area=10000, n_tree=6000, n_quadrat=40, Fr=0.0, m2=0)
-    vza = range(-80, 80, 5)
-    bili_pg, bili_pt, bili_zg, bili_zt = [], [], [], []
-    for i in vza:
-        if i < 0:
-            geovi = GeoVI(SZA=20, VZA=abs(i), phi=180)
-        else:
-            geovi = GeoVI(SZA=20, VZA=i, phi=0)
-        aop_domain = AOPDomain(geovi=geovi, domain=domain)
-        ro = aop_domain.Rc
-        zg, pg, pt, zt = aop_domain.ZG, aop_domain.PG, aop_domain.PT, aop_domain.ZT
-        bili_pg.append(pg), bili_pt.append(pt), bili_zg.append(zg), bili_zt.append(zt)
-    vza = list(vza)
-    rs = np.vstack((vza, bili_pg, bili_pt, bili_zg, bili_zt))
-    rs = np.transpose(rs)
+    if vza < 0:
+        geovi = GeoVI(SZA=20, VZA=abs(vza), phi=180)
+    else:
+        geovi = GeoVI(SZA=20, VZA=vza, phi=0)
+    aop_domain = AOPDomain(geovi=geovi, domain=domain)
+    ro = aop_domain.Rc
+    zg, pg, pt, zt = aop_domain.ZG, aop_domain.PG, aop_domain.PT, aop_domain.ZT
+    return vza, zg, pg, pt, zt
+
+
+if __name__ == '__main__':
+    start = time.time()
+    vza = list(range(-80, 80, 5))
+    with mp.Pool(mp.cpu_count()) as p:
+        rs = p.map(simulate_Rc, vza)
+    rs = list(map(list, rs))
+    rs = np.array(rs)
     np.save('abc_cone.npy', rs)
     end = time.time()
-    print('Record time: %.5f' % (end - start))
+    print('Record time: %.2f' % (end - start))
     fig, ax = plt.subplots()
-    l1, = ax.plot(vza, bili_pg)
-    l2, = ax.plot(vza, bili_pt)
-    l3, = ax.plot(vza, bili_zg)
-    l4, = ax.plot(vza, bili_zt)
+    l1, = ax.plot(rs[:, 0], rs[:, 2])
+    l2, = ax.plot(rs[:, 0], rs[:, 3])
+    l3, = ax.plot(rs[:, 0], rs[:, 1])
+    l4, = ax.plot(rs[:, 0], rs[:, 4])
     ax.set(xlabel='vza', ylabel='areal proportions')
     ax.set_yticks([0, 0.5, 1])
     ax.legend((l1, l2, l3, l4), ('sunlit ground', 'sunlit foliage', 'shaded ground', 'shaded foliage'),
