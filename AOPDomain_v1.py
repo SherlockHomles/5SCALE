@@ -570,9 +570,6 @@ class AOPDomain(object):
         ll = self.__domain.tree.Ll
         rb = self.__domain.tree.Rb
         ratio = self.__domain.tree.leaf.RATIO
-        # xb, xl, lb, za, gb, gl, pbj, pj = 0., 0., 0., 0., 0., 0., 0., 0.
-        # cos_zab, p, mub, mub, beta, s, agb, agl = 0., 0., 0., 0., 0., 0., 0., 0.
-        # j = 0
         lb = LAI / ll
         mub = lb * b / (v * d)
         mul = ll * b / (v * d)
@@ -781,10 +778,6 @@ class AOPDomain(object):
                 ptree[j] = pt
                 ptreec[j] = ptc
                 ptreer[j] = ptree[j]
-            # if 'VZA' == option:
-            #    ptreev[j] = ptree[j]
-            # if 'SZA' == option:
-            #    ptrees[j] = ptree[j]
         psv = 1 - p - ptj1 * (1 - pgap)
         psvc = 1 - pc - ptjc1 * (1 - pgap)
         psv = (psv * a - psvc * ac) / (a - ac)
@@ -900,7 +893,8 @@ class AOPDomain(object):
                 raise ValueError('OMEGA_TOTAL is larger than 1, this is ridiculous')
             cv = 0.5 * omega_total / cos(VZA)
             thelta_half_mean = atan((ha + 0.5 * (hb + hc / 3.)) / (0.5 * e_r))
-            q1_mean = self._q1(pi / 2 + thelta_half_mean, 0)
+            q1_mean = self._q1(np.array([pi / 2 + thelta_half_mean]), 0)
+            q1_mean = q1_mean[0]
             del1 = 1 - cp * GeoVI.XI(SZA, pi / 2 + thelta_half_mean, 0) / pi
             q1b_mean = q1_mean * (1 - del1) / del1
             if q1b_mean > 1: q1b_mean = 1
@@ -921,46 +915,42 @@ class AOPDomain(object):
             if 'SPHEROID' != shape:
                 tt = np.power(tt, gamma_e)
 
-            F_G_T = 0
-            li = delta_LAI
-            while li <= LAI:
-                # for li in range(delta_LAI, LAI, delta_LAI):
-                arg4 = 0.5 * omega_total * li / cos(asin(0.537 + 0.025 * li))
-                f_s_t = f_s_t + 0.5 * exp(-arg4) * exp(-cv * li) * delta_LAI
-                f_s_trest = f_s_trest + 0.5 * exp(-arg4) * delta_LAI
-                arg5 = 0.5 * omega_total * (LAI - li) / cos(asin(0.537 + 0.025 * (LAI - li)))
-                F_G_T = F_G_T + 0.5 * exp(-arg5) * delta_LAI
-                p_tot = p_tot + exp(-cv * li) * delta_LAI
-                f_tt2 = 0
-                f_tt3 = 0
-                hi = (hb + hc / 3) - li * (hb + hc / 3) / LAI
-                inc_thelta = delta_LAI
-                thelta_min = (hi - inc_thelta) / e_r
-                thelta_min = 0.5 * (pi / 2 + atan(thelta_min))
-                thelta_max = ((hb + hc / 3) - hi) / e_r
-                thelta_max = 0.5 * (pi / 2 + atan(thelta_max))
-
-                if thelta_min > thelta_max:
-                    thelta_min, thelta_max = thelta_max, thelta_min
-
-                thelta = thelta_min
-                while thelta <= thelta_max:
-                    thelta_h = pi - 2 * thelta
-                    f_tt2 = f_tt2 + self._q1(thelta_h, 0) * cos(thelta) * sin(thelta) * inc_thelta * 10 * pi / 180
-                    del1 = 0
-                    del2 = 0
-                    for p in range(0, 180, 10):
-                        del1 = del1 + 1 - cp * (
-                                cos(SZA) * cos(thelta_h) + sin(thelta_h) * sin(SZA) * cos(p * pi / 180)) / pi
-                        del2 = del2 + cp * (
-                                cos(SZA) * cos(thelta_h) + sin(thelta_h) * sin(SZA) * cos(p * pi / 180)) / pi
-                    f_tt2 = f_tt2 * del1 * 10 * pi / 180
-                    f_tt3 = f_tt2 * del2 * 10 * pi / 180
-                    thelta = thelta + inc_thelta
-
-                f_t_zt = f_t_zt + f_tt2 * delta_LAI
-                f_tt_zt = f_tt_zt + f_tt3 * delta_LAI
-                li = li + delta_LAI
+            li = delta_LAI + np.arange(0, (LAI - delta_LAI) // delta_LAI + 1) * delta_LAI
+            arg4 = 0.5 * omega_total * li / np.cos(np.arcsin(0.537 + 0.025 * li))
+            f_s_t = np.sum(0.5 * np.exp(-arg4) * np.exp(-cv * li) * delta_LAI)
+            f_s_trest = np.sum(0.5 * np.exp(-arg4) * delta_LAI)
+            arg5 = 0.5 * omega_total * (LAI - li) / np.cos(np.arcsin(0.537 + 0.025 * (LAI - li)))
+            F_G_T = np.sum(0.5 * np.exp(-arg5) * delta_LAI)
+            p_tot = np.sum(np.exp(-cv * li) * delta_LAI)
+            hi = (hb + hc / 3) - li * (hb + hc / 3) / LAI
+            inc_thelta = delta_LAI
+            thelta_min = (hi - inc_thelta) / e_r
+            thelta_min = 0.5 * (pi / 2 + np.arctan(thelta_min))
+            thelta_max = ((hb + hc / 3) - hi) / e_r
+            thelta_max = 0.5 * (pi / 2 + np.arctan(thelta_max))
+            flag = thelta_min > thelta_max
+            temp = thelta_min.copy()
+            thelta_min[flag] = thelta_max[flag]
+            thelta_max[flag] = temp[flag]
+            f_tt2, f_tt3 = [], []
+            for min, max in list(zip(thelta_min, thelta_max)):
+                ub = (max - min) // inc_thelta + 1
+                thelta = min + np.arange(0, ub) * inc_thelta
+                thelta_h = pi - 2 * thelta
+                # do not enter the view of a np.ndarray into _q1, othersize the array will change, instead used deep copy
+                in3 = self._q1(thelta_h.copy(), 0) * np.cos(thelta) * np.sin(thelta) * inc_thelta * 10 * pi / 180
+                p = np.radians(np.arange(0, 180, 10))
+                in1 = np.dot(np.cos(thelta_h[:, np.newaxis]), np.ones_like(p[np.newaxis, :]))
+                in2 = np.dot(np.sin(thelta_h[:, np.newaxis]), np.cos(p[np.newaxis, :]))
+                step = 10 * pi / 180
+                del1 = np.sum(1 - cp * (cos(SZA) * in1 + sin(SZA) * in2) / pi, axis=1).flatten() * step
+                del2 = np.sum(cp * (cos(SZA) * in1 + sin(SZA) * in2) / pi, axis=1).flatten() * step
+                DEL = np.cumprod(del1[::-1])
+                elm = np.sum(DEL * in3[::-1])
+                f_tt2.append(elm)
+                f_tt3.append(elm * del2[-1])
+            f_t_zt = np.sum(np.array(f_tt2) * delta_LAI)
+            f_tt_zt = np.sum(np.array(f_tt3) * delta_LAI)
 
             f_t_zt = f_t_zt / LAI
             f_tt_zt = f_tt_zt / LAI
@@ -1013,7 +1003,7 @@ class AOPDomain(object):
             r0 = (1 + fd) * rg
         return wave, r0
 
-    def _q1(self, thelta, phi):
+    def _q1(self, thelta: np.ndarray, phi):
         '''calcualte appr. of Q1tot for MS Scheme'''
         SZA = self.__geovi.SZA
         cp = self.__domain.tree.leaf.cp
@@ -1027,40 +1017,44 @@ class AOPDomain(object):
         d = self.__domain.n_tree
         lo_90 = self.__Lo_90
 
-        if thelta < 0: thelta = -thelta
-        diff = cos(SZA) * cos(thelta) + sin(thelta) * cos(phi) * sin(SZA)
-        if diff < 0: diff = -diff
+        thelta[thelta < 0] = -thelta[thelta < 0]
+        diff = np.cos(SZA) * np.cos(thelta) + np.sin(thelta) * np.cos(phi) * np.sin(SZA)
+        diff[diff < 0] = -diff[diff < 0]
         del0 = 1 - diff * cp / pi
-        if del0 < 0: del0 = -del0
-        if del0 > 1: del0 = 1
-        if thelta > pi / 2: thelta = pi - thelta
-        if thelta == 0: thelta = 0.0000000001
-        if sqrt((thelta - pi / 2) * (thelta - pi / 2)) < 0: thelta = pi / 2 - 0.0000001
-        cv = gv / sin(thelta)
-        vg_thelta = 2 * tan(thelta) * r * (hb + hc) + pi * (r ** 2)
-        pgapv_thelta = exp(-cv * LAI * b / (d * vg_thelta * cos(thelta)))
-        q1_thelta = (1. - exp(-(cs * lo_90 + cv * lo_90))) * cs * cv / (cs + cv) / (1 - pgapv_thelta)
+        del0[del0 < 0] = -del0[del0 < 0]
+        del0[del0 > 1] = 1
+        thelta[thelta > pi / 2] = pi - thelta[thelta > pi / 2]
+        thelta[thelta == 0] = 0.0000000001
+        flag = np.sqrt((thelta - pi / 2) * (thelta - pi / 2)) < 0
+        thelta[flag] = pi / 2 - 0.0000001
+        cv = gv / np.sin(thelta)
+        vg_thelta = 2 * np.tan(thelta) * r * (hb + hc) + pi * (r ** 2)
+        pgapv_thelta = np.exp(-cv * LAI * b / (d * vg_thelta * np.cos(thelta)))
+        q1_thelta = (1. - np.exp(-(cs * lo_90 + cv * lo_90))) * cs * cv / (cs + cv) / (1 - pgapv_thelta)
         q1_thelta = q1_thelta * del0
-        if q1_thelta > 1:
+        flag1 = np.where(q1_thelta > 1, 1, 0)
+        count1 = np.sum(flag1)
+        flag2 = np.where(q1_thelta < 0, 1, 0)
+        count2 = np.sum(flag2)
+        if count1 > 0:
             raise ValueError('Q1_thelta is larger than 1, impossible!')
-        elif q1_thelta < 0:
+        if count2 > 0:
             raise ValueError('Q1_thelta is smaller than 0, impossible!')
-        else:
-            return q1_thelta
+        return q1_thelta
+
+
+def simulate_Rc():
+    pass
 
 
 if __name__ == '__main__':
     start = time.time()
     leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
-    tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
-                        alpha_b=25)
-    # tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
-    #                alpha_b=25, alpha_l=-1)
+    # tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
+    #                    alpha_b=25)
+    tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
+                    alpha_b=25, alpha_l=-1)
     domain = Domain(tree=tree, area=10000, n_tree=6000, n_quadrat=40, Fr=0.0, m2=0)
-    # geovi = GeoVI(SZA=20, VZA=30, phi=0)
-    # aop_domain = AOPDomain(geovi=geovi, domain=domain)
-    # ro = aop_domain.Rc
-    # print('\nVZA=30\n', ro)
     vza = range(-80, 80, 5)
     bili_pg, bili_pt, bili_zg, bili_zt = [], [], [], []
     for i in vza:
@@ -1069,19 +1063,13 @@ if __name__ == '__main__':
         else:
             geovi = GeoVI(SZA=20, VZA=i, phi=0)
         aop_domain = AOPDomain(geovi=geovi, domain=domain)
-        # ro = aop_domain.Rc
+        ro = aop_domain.Rc
         zg, pg, pt, zt = aop_domain.ZG, aop_domain.PG, aop_domain.PT, aop_domain.ZT
         bili_pg.append(pg), bili_pt.append(pt), bili_zg.append(zg), bili_zt.append(zt)
-        # try:
-        # except Exception:
-        #    pass
-        # finally:
-        #    zg, pg, pt, zt = aop_domain.ZG, aop_domain.PG, aop_domain.PT, aop_domain.ZT
-        #    bili_pg.append(pg), bili_pt.append(pt), bili_zg.append(zg), bili_zt.append(zt)
     vza = list(vza)
     rs = np.vstack((vza, bili_pg, bili_pt, bili_zg, bili_zt))
     rs = np.transpose(rs)
-    np.save('abc_spheroid.npy', rs)
+    np.save('abc_cone.npy', rs)
     end = time.time()
     print('Record time: %.5f' % (end - start))
     fig, ax = plt.subplots()
