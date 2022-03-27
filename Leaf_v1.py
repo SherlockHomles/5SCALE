@@ -71,8 +71,10 @@ def LIBERTY(D: float, xu: float, thickness: float, baseline: float, albino: floa
     i = np.arange(0, 421).reshape([421, 1])
     n = 1.4891 - baseline * i
     T12 = tav(90, n)
+    T21 = T12 / np.square(n)
     me = 1 - T12
-    mi = cal_mi(n)
+    mi = 1 - T21
+    #mi = cal_mi(n)
     dat_path = os.path.dirname(os.path.abspath(__file__))
     k_a_f = os.path.join(dat_path, 'ALBINO.DAT')
     k_l_f = os.path.join(dat_path, 'LIGCELL.DAT')
@@ -140,23 +142,23 @@ def LIBERTY(D: float, xu: float, thickness: float, baseline: float, albino: floa
     return wv, refl, trans
 
 
-def cal_mi(ref):
-    n = ref.size
-    mi = np.zeros(ref.shape)
-    tetac = np.degrees(np.arcsin(1 / ref))
-    width = pi / 180
-    for i in range(n):
-        mint = 0
-        for j in range(1, np.int64(np.ceil(tetac[i][0]))):
-            alpha = j * pi / 180
-            beta = asin(1 / ref[i] * sin(alpha))
-            plus = alpha + beta
-            dif = alpha - beta
-            refl = 0.5 * (((sin(dif) * sin(dif)) / (sin(plus) * sin(plus))) + (
-                    (tan(dif) * tan(dif)) / (tan(plus) * tan(plus))))
-            mint = mint + (refl * sin(alpha) * cos(alpha) * width)
-        mi[i] = 1 - np.square(sin(tetac[i] * pi / 180)) + 2 * mint
-    return mi
+#def cal_mi(ref):
+#    n = ref.size
+#    mi = np.zeros_like(ref)
+#    tetac = np.degrees(np.arcsin(1 / ref))
+#    width = pi / 180
+#    for i in range(n):
+#        mint = 0
+#        for j in range(1, np.int64(np.ceil(tetac[i][0]))):
+#            alpha = j * pi / 180
+#            beta = asin(ref[i] * sin(alpha))
+#            plus = alpha + beta
+#            dif = alpha - beta
+#            refl = 0.5 * (((sin(dif) * sin(dif)) / (sin(plus) * sin(plus))) + (
+#                    (tan(dif) * tan(dif)) / (tan(plus) * tan(plus))))
+#            mint = mint + (refl * sin(alpha) * cos(alpha) * width)
+#        mi[i] = 1 - np.square(sin(tetac[i] * pi / 180)) + 2 * mint
+#    return mi
 
 
 class LeafSpecies(ABC):
