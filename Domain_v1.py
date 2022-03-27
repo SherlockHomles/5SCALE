@@ -32,16 +32,20 @@ class Domain(object):
         self.n_quadrat = n_quadrat
         self.Fr = Fr
         self.m2 = m2
-        Omega_stand = self.Omega_stand
-        if 0 < Omega_stand < 1:
-            Omega_E = Omega_stand + (1 - Omega_stand) / 2
-            self.tree.Omega_E = Omega_E
         R = self.tree.R
         crown_area = pi * R ** 2 * n_tree
         if crown_area > area and Fr > 0.5 and self.distribution == 'POISSON':
             raise ValueError(
                 'domain area is smaller than the total surface of the crowns, please enter a reasonable number of '
                 'trees')
+        self.__Omega_stand = self.tree.Omega_E
+        if 0 < self.__Omega_stand < 1:
+            self.tree.Omega_E = self.__Omega_stand + (1 - self.__Omega_stand) / 2
+        self.__px_poisson = self._poisson()
+        if self.distribution == 'POISSON':
+            self.__px = self.__px_poisson.copy()  # do not use slight copy here, use deep copy instead
+        else:
+            self.__px = self._neyman()
 
     @property
     def tree(self):
@@ -111,22 +115,17 @@ class Domain(object):
 
     @property
     def Omega_stand(self):
-        Omega = self.tree.Omega_E
-        return Omega
+        return self.__Omega_stand
 
     @property
     def Px(self):
         # returns an array of poisson or neyman distribution depending on distribution type
-        if self.distribution == 'POISSON':
-            px = self._poisson()
-        else:
-            px = self._neyman()
-        return px
+        return self.__px
 
     @property
     def Px_poisson(self):
         # returns an array of poisson distribution
-        return self._poisson()
+        return self.__px_poisson
 
     @property
     def MAX_TREE_PER_QUADRAT(self):
