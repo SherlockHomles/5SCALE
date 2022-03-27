@@ -32,9 +32,9 @@ class Domain(object):
         self.n_quadrat = n_quadrat
         self.Fr = Fr
         self.m2 = m2
-        Omega_stand = self.Omega_stand
-        if 0 < Omega_stand < 1:
-            Omega_E = Omega_stand + (1 - Omega_stand) / 2
+        self._Omega_stand = self.tree.Omega_E
+        if 0 < self._Omega_stand < 1:
+            Omega_E = self._Omega_stand + (1 - self._Omega_stand) / 2
             self.tree.Omega_E = Omega_E
 
     @property
@@ -110,8 +110,7 @@ class Domain(object):
 
     @property
     def Omega_stand(self):
-        Omega = self.tree.Omega_E
-        return Omega
+        return self._Omega_stand
 
     @property
     def Px(self):
