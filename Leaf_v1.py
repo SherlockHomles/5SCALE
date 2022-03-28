@@ -74,7 +74,8 @@ def LIBERTY(D: float, xu: float, thickness: float, baseline: float, albino: floa
     T21 = T12 / np.square(n)
     me = 1 - T12
     mi = 1 - T21
-    #mi = cal_mi(n)
+    # me = cal_me(n)
+    # mi = cal_mi(n)
     dat_path = os.path.dirname(os.path.abspath(__file__))
     k_a_f = os.path.join(dat_path, 'ALBINO.DAT')
     k_l_f = os.path.join(dat_path, 'LIGCELL.DAT')
@@ -142,7 +143,25 @@ def LIBERTY(D: float, xu: float, thickness: float, baseline: float, albino: floa
     return wv, refl, trans
 
 
-#def cal_mi(ref):
+# def cal_me(ref):
+#    n = ref.size
+#    me = np.zeros_like(ref)
+#    width = pi / 180
+#    for i in range(n):
+#        ment = 0
+#        for j in range(1, 90):
+#            alpha = j * pi / 180
+#            beta = asin(1 / ref[i] * sin(alpha))
+#            plus = alpha + beta
+#            dif = alpha - beta
+#            refl = 0.5 * (((sin(dif) * sin(dif)) / (sin(plus) * sin(plus))) + (
+#                    (tan(dif) * tan(dif)) / (tan(plus) * tan(plus))))
+#            ment = ment + (refl * sin(alpha) * cos(alpha) * width)
+#        me[i] = 2 * ment
+#    return me
+#
+#
+# def cal_mi(ref):
 #    n = ref.size
 #    mi = np.zeros_like(ref)
 #    tetac = np.degrees(np.arcsin(1 / ref))

@@ -689,7 +689,7 @@ class AOPDomain(object):
         else:
             raise ValueError('bad option in _fo function, it must be VZA or SZA')
 
-    def _overlap_v1(self, option: str, dist=None):
+    def _overlap_v1(self, option: str, dist: Optional[str] = None):
         '''
         subroutine to calculate gap fraction (Pvg & Pig), Pv|Ps, Pvc|Psc
         @param option: option to determine what kind of returns
@@ -1046,10 +1046,10 @@ class AOPDomain(object):
 
 def simulate_Rc(vza: int):
     leaf = Needle(diameter=40, thickness=1.6, xu=0.045, baseline=0.0005, albino=2, Cab=200, Cl=40, Cp=1, Cw=100)
-    # tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
-    #                    alpha_b=25)
-    tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
-                    alpha_b=25, alpha_l=-1)
+    tree = SpheroidTree(leaf=leaf, R=1, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH', alpha_l=-1,
+                        alpha_b=25)
+    # tree = ConeTree(leaf=leaf, R=1, alpha=13, Ha=1, Hb=5, LAI=3.5, Omega_E=0.8, gamma_E=1, ge_choice='BRANCH',
+    #                alpha_b=25, alpha_l=-1)
     domain = Domain(tree=tree, area=10000, n_tree=6000, n_quadrat=40, Fr=0.0, m2=0)
     if vza < 0:
         geovi = GeoVI(SZA=20, VZA=abs(vza), phi=180)
@@ -1062,15 +1062,15 @@ def simulate_Rc(vza: int):
 
 
 if __name__ == '__main__':
-    start = time.time()
+    # start = time.time()
     vza = list(range(-80, 80, 5))
     with mp.Pool(mp.cpu_count()) as p:
         rs = p.map(simulate_Rc, vza)
     rs = list(map(list, rs))
     rs = np.array(rs)
     np.save('abc_cone.npy', rs)
-    end = time.time()
-    print('Record time: %.2f' % (end - start))
+    # end = time.time()
+    # print('Record time: %.2f' % (end - start))
     fig, ax = plt.subplots()
     l1, = ax.plot(rs[:, 0], rs[:, 2])
     l2, = ax.plot(rs[:, 0], rs[:, 3])
